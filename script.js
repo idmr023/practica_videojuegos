@@ -6,6 +6,7 @@ var enemigos;
 var balas;
 var sonidoDisparo;
 var sonidoExplosion;
+var musicaFondo;
 var botonInicio;
 var teclaIzquierda;
 var teclaDerecha;
@@ -30,9 +31,11 @@ var estadoInicio = {
         texto.anchor.set(0.5);
 
         botonInicio = juego.add.button(juego.world.centerX, 400, 'boton', function () {
-            var sonido = juego.add.audio('inicioSonido');
-            sonido.volume = 0.2;
-            sonido.play();
+            if (!musicaFondo || !musicaFondo.isPlaying) {
+                musicaFondo = juego.add.audio('inicioSonido');
+                musicaFondo.volume = 0.3;
+                musicaFondo.loopFull();
+            }
             juego.state.start('Juego');
         }, this);
         botonInicio.anchor.setTo(0.5);
@@ -49,6 +52,7 @@ var estadoJuego = {
         juego.load.image('bala', 'img/laser.png');
         juego.load.audio('disparo', 'audio/laser.mp3');
         juego.load.audio('explosion', 'audio/colision.mp3');
+        juego.load.audio('musica', 'audio/music.mp3');
         juego.load.image('botonReiniciar', 'img/boton.png');
     },
 
@@ -59,7 +63,6 @@ var estadoJuego = {
         jugador.anchor.setTo(0.5);
         juego.physics.arcade.enable(jugador);
 
-        // Grupo de balas
         balas = juego.add.group();
         balas.enableBody = true;
         balas.physicsBodyType = Phaser.Physics.ARCADE;
@@ -69,7 +72,6 @@ var estadoJuego = {
         balas.setAll('outOfBoundsKill', true);
         balas.setAll('checkWorldBounds', true);
 
-        // Grupo de enemigos
         enemigos = juego.add.group();
         enemigos.enableBody = true;
         enemigos.physicsBodyType = Phaser.Physics.ARCADE;
@@ -79,7 +81,10 @@ var estadoJuego = {
         juego.add.tween(enemigos).to({ x: 150 }, 2000, Phaser.Easing.Linear.None, true, 0, -1, true);
 
         sonidoDisparo = juego.add.audio('disparo');
+        sonidoDisparo.volume = 1;
+
         sonidoExplosion = juego.add.audio('explosion');
+        sonidoExplosion.volume = 1;
 
         teclaIzquierda = juego.input.keyboard.addKey(Phaser.Keyboard.LEFT);
         teclaDerecha = juego.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
@@ -87,7 +92,6 @@ var estadoJuego = {
         var barra = juego.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
         barra.onDown.add(this.disparar, this);
 
-        // Footer con tu nombre
         var footer = juego.add.text(juego.world.centerX, juego.height - 20, "Ivan Daniel Manrique Roa", {
             font: "14px Arial",
             fill: "#ffffff"
@@ -177,6 +181,7 @@ var estadoJuego = {
         var botonReiniciar = juego.add.button(juego.world.centerX, 450, 'botonReiniciar', function () {
             nivel = 1;
             juegoTerminado = false;
+            if (musicaFondo && musicaFondo.isPlaying) musicaFondo.stop();
             juego.state.start('Inicio');
         }, this);
         botonReiniciar.anchor.set(0.5);
